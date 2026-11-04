@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vokabeln verwalten</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .back-link {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+        .add-form {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .add-form h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .form-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .form-row input {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+        }
+        .form-row input:focus {
+            border-color: #667eea;
+        }
+        .btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-danger {
+            background: #f44336;
+            color: white;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        .btn-save {
+            background: #4caf50;
+            color: white;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        .word-count {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .word-list {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .word-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+        .word-item:last-child {
+            border-bottom: none;
+        }
+        .word-item:nth-child(even) {
+            background: #f8f9fa;
+        }
+        .word-item input {
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+        }
+        .word-item input:focus {
+            border-color: #667eea;
+        }
+        .word-item .en {
+            flex: 2;
+            min-width: 120px;
+        }
+        .word-item .de {
+            flex: 2;
+            min-width: 120px;
+        }
+        .word-item .pron {
+            flex: 1;
+            min-width: 100px;
+        }
+        .word-item .actions {
+            display: flex;
+            gap: 5px;
+        }
+        @media (max-width: 600px) {
+            .word-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .word-item input {
+                width: 100%;
+            }
+            .word-item .actions {
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Vokabeln verwalten</h1>
+        <p class="subtitle">Wörter hinzufügen, bearbeiten oder löschen</p>
+        <div class="back-link"><a href="/">← Zurück zum Quiz</a></div>
+        
+        <div class="add-form">
+            <h3>➕ Neues Wort hinzufügen</h3>
+            <form action="/admin/add" method="POST">
+                <div class="form-row">
+                    <input type="text" name="en" placeholder="Englisch" required>
+                    <input type="text" name="de" placeholder="Deutsch" required>
+                    <input type="text" name="pron" placeholder="Aussprache (optional)">
+                    <button type="submit" class="btn btn-primary">Hinzufügen</button>
+                </div>
+            </form>
+        </div>
+        
+        <p class="word-count">{{ words|length }} Wörter insgesamt</p>
+        
+        <div class="word-list">
+            {% for word in words %}
+            <div class="word-item">
+                <form action="/admin/edit/{{ word.id }}" method="POST" style="display: contents;">
+                    <input type="text" name="en" value="{{ word.en }}" class="en" required>
+                    <input type="text" name="de" value="{{ word.de }}" class="de" required>
+                    <input type="text" name="pron" value="{{ word.pron }}" class="pron" placeholder="Aussprache">
+                    <div class="actions">
+                        <button type="submit" class="btn btn-save">💾</button>
+                </form>
+                <form action="/admin/delete/{{ word.id }}" method="POST" style="display: inline;" onsubmit="return confirm('Wirklich löschen?');">
+                    <button type="submit" class="btn btn-danger">🗑️</button>
+                </form>
+                    </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

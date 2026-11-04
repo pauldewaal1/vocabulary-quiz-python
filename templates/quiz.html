@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vokabeltest - Englisch/Deutsch</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .admin-link {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .admin-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .admin-link a:hover {
+            text-decoration: underline;
+        }
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .mode-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .mode-btn.active, .mode-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px;
+            transition: width 0.3s;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        .question-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .question-number {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+        .word {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .pronunciation {
+            font-size: 14px;
+            color: #888;
+            font-style: italic;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .speak-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            flex-shrink: 0;
+        }
+        .speak-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.4);
+        }
+        .speak-btn:active {
+            transform: scale(0.95);
+        }
+        .speak-btn.speaking {
+            animation: pulse 0.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .answer-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .answer-input:focus {
+            border-color: #667eea;
+        }
+        .answer-input.correct {
+            border-color: #4caf50;
+            background: #e8f5e9;
+        }
+        .answer-input.wrong {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        .feedback.correct {
+            background: #e8f5e9;
+            color: #2e7d32;
+            display: block;
+        }
+        .feedback.wrong {
+            background: #ffebee;
+            color: #c62828;
+            display: block;
+        }
+        .correct-answer {
+            font-weight: bold;
+        }
+        .btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+            margin-top: 10px;
+        }
+        .results {
+            text-align: center;
+            display: none;
+        }
+        .results h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .score {
+            font-size: 72px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .score-label {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .emoji {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        .wrong-list {
+            text-align: left;
+            background: #fff3e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .wrong-list h3 {
+            color: #e65100;
+            margin-bottom: 15px;
+        }
+        .wrong-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #ffe0b2;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .wrong-item:last-child {
+            border-bottom: none;
+        }
+        .hidden {
+            display: none;
+        }
+        /* Fireworks canvas */
+        #fireworks-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="fireworks-canvas"></canvas>
+    <div class="container">
+        <h1>🎓 Vokabeltest</h1>
+        <p class="subtitle">Englisch ↔ Deutsch</p>
+        <div class="admin-link"><a href="/admin">📝 Wörter bearbeiten</a></div>
+        
+        <div id="start-screen">
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="en-de">Englisch → Deutsch</button>
+                <button class="mode-btn" data-mode="de-en">Deutsch → Englisch</button>
+                <button class="mode-btn" data-mode="mixed">Gemischt</button>
+            </div>
+            <button class="btn btn-primary" onclick="startQuiz()">Quiz starten 🚀</button>
+        </div>
+        
+        <div id="quiz-screen" class="hidden">
+            <div class="stats">
+                <span>Frage <span id="current-num">1</span> von <span id="total-num">20</span></span>
+                <span>✓ <span id="correct-count">0</span> | ✗ <span id="wrong-count">0</span></span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            
+            <div class="question-card">
+                <div class="question-number" id="question-label">Übersetze ins Deutsche:</div>
+                <div class="word" id="question-word">upstairs</div>
+                <div class="pronunciation">
+                    <button class="speak-btn" id="speak-btn" onclick="speakWord()" title="Aussprache anhören">🔊</button>
+                    <span id="pronunciation">[ˈʌpˌsteəz]</span>
+                </div>
+                <input type="text" class="answer-input" id="answer-input" placeholder="Deine Antwort..." autocomplete="off">
+                <div class="feedback" id="feedback"></div>
+            </div>
+            
+            <button class="btn btn-primary" id="check-btn" onclick="checkAnswer()">Prüfen ✓</button>
+            <button class="btn btn-primary hidden" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+        </div>
+        
+        <div id="results-screen" class="results">
+            <div class="emoji" id="result-emoji">🎉</div>
+            <h2>Quiz beendet!</h2>
+            <div class="score" id="final-score">85%</div>
+            <div class="score-label"><span id="correct-final">17</span> von <span id="total-final">20</span> richtig</div>
+            
+            <div class="wrong-list hidden" id="wrong-list">
+                <h3>📝 Diese Wörter üben:</h3>
+                <div id="wrong-items"></div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="restartQuiz()">Nochmal spielen 🔄</button>
+            <button class="btn btn-secondary" onclick="location.reload()">Modus wechseln</button>
+        </div>
+    </div>
+
+    <script>
+        let vocabulary = [];
+        let currentMode = 'en-de';
+        let questions = [];
+        let currentQuestion = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let wrongAnswers = [];
+        let answered = false;
+
+        // Audio context for sound effects
+        let audioContext = null;
+
+        function getAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioContext;
+        }
+
+        function playCorrectSound() {
+            try {
+                const ctx = getAudioContext();
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                
+                oscillator.frequency.setValueAtTime(523.25, ctx.currentTime);
+                oscillator.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+                oscillator.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
+                
+                gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+                gainNode.gain.exponentialDecayTo && gainNode.gain.exponentialDecayTo(0.01, ctx.currentTime + 0.4);
+                gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                
+                oscillator.start(ctx.currentTime);
+                oscillator.stop(ctx.currentTime + 0.4);
+            } catch (e) {
+                console.log('Audio not available');
+            }
+        }
+
+        // Fireworks
+        const canvas = document.getElementById('fireworks-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let animationId = null;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.velocity = {
+                    x: (Math.random() - 0.5) * 8,
+                    y: (Math.random() - 0.5) * 8
+                };
+                this.alpha = 1;
+                this.decay = Math.random() * 0.015 + 0.015;
+                this.size = Math.random() * 3 + 2;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            update() {
+                this.velocity.y += 0.1;
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                this.alpha -= this.decay;
+            }
+        }
+
+        function createFirework(x, y) {
+            const colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe', '#43e97b', '#38f9d7', '#ffecd2', '#fcb69f'];
+            for (let i = 0; i < 50; i++) {
+                particles.push(new Particle(x, y, colors[Math.floor(Math.random() * colors.length)]));
+            }
+        }
+
+        function animateFireworks() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles = particles.filter(p => p.alpha > 0);
+            particles.forEach(p => {
+                p.draw();
+                p.update();
+            });
+
+            if (particles.length > 0) {
+                animationId = requestAnimationFrame(animateFireworks);
+            }
+        }
+
+        function launchFireworks() {
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    createFirework(
+                        Math.random() * canvas.width,
+                        Math.random() * canvas.height * 0.5
+                    );
+                    if (i === 0) animateFireworks();
+                }, i * 200);
+            }
+        }
+
+        // Load vocabulary from API
+        async function loadVocabulary() {
+            try {
+                const response = await fetch('/api/words');
+                vocabulary = await response.json();
+            } catch (e) {
+                console.error('Failed to load vocabulary:', e);
+                vocabulary = [];
+            }
+        }
+
+        // Mode selection
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMode = btn.dataset.mode;
+            });
+        });
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        async function startQuiz() {
+            await loadVocabulary();
+            
+            if (vocabulary.length === 0) {
+                alert('Keine Wörter vorhanden! Bitte füge zuerst Wörter hinzu.');
+                return;
+            }
+            
+            const shuffled = shuffleArray(vocabulary);
+            const numQuestions = Math.min(20, shuffled.length);
+            questions = shuffled.slice(0, numQuestions).map(word => {
+                let direction = currentMode;
+                if (currentMode === 'mixed') {
+                    direction = Math.random() < 0.5 ? 'en-de' : 'de-en';
+                }
+                return { ...word, direction };
+            });
+
+            currentQuestion = 0;
+            correctCount = 0;
+            wrongCount = 0;
+            wrongAnswers = [];
+
+            document.getElementById('total-num').textContent = questions.length;
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            document.getElementById('results-screen').style.display = 'none';
+
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const q = questions[currentQuestion];
+            const isEnToDe = q.direction === 'en-de';
+
+            document.getElementById('current-num').textContent = currentQuestion + 1;
+            document.getElementById('correct-count').textContent = correctCount;
+            document.getElementById('wrong-count').textContent = wrongCount;
+            document.getElementById('progress').style.width = ((currentQuestion) / questions.length * 100) + '%';
+
+            document.getElementById('question-label').textContent = isEnToDe ? 'Übersetze ins Deutsche:' : 'Übersetze ins Englische:';
+            document.getElementById('question-word').textContent = isEnToDe ? q.en : q.de;
+            document.getElementById('pronunciation').textContent = isEnToDe ? q.pron : '';
+            document.getElementById('speak-btn').style.display = isEnToDe ? 'flex' : 'none';
+
+            const input = document.getElementById('answer-input');
+            input.value = '';
+            input.className = 'answer-input';
+            input.disabled = false;
+            input.focus();
+
+            document.getElementById('feedback').className = 'feedback';
+            document.getElementById('feedback').innerHTML = '';
+            document.getElementById('check-btn').classList.remove('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+
+            answered = false;
+        }
+
+        function speakWord() {
+            const word = document.getElementById('question-word').textContent;
+            const q = questions[currentQuestion];
+            const lang = q.direction === 'en-de' ? 'en-GB' : 'de-DE';
+
+            const btn = document.getElementById('speak-btn');
+            btn.classList.add('speaking');
+
+            const utterance = new SpeechSynthesisUtterance(word);
+            utterance.lang = lang;
+            utterance.rate = 0.9;
+
+            utterance.onend = () => btn.classList.remove('speaking');
+            utterance.onerror = () => btn.classList.remove('speaking');
+
+            speechSynthesis.speak(utterance);
+        }
+
+        function normalizeAnswer(str) {
+            return str.toLowerCase()
+                .replace(/[.,!?;:'"„"‚'«»\-–—()[\]{}]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function checkAnswer() {
+            if (answered) return;
+            answered = true;
+
+            const q = questions[currentQuestion];
+            const isEnToDe = q.direction === 'en-de';
+            const correctAnswer = isEnToDe ? q.de : q.en;
+            const userAnswer = document.getElementById('answer-input').value;
+
+            const normalizedUser = normalizeAnswer(userAnswer);
+            const normalizedCorrect = normalizeAnswer(correctAnswer);
+
+            // Check for multiple correct answers (separated by comma or /)
+            const correctOptions = normalizedCorrect.split(/[,\/]/).map(s => s.trim());
+            const isCorrect = correctOptions.some(opt => normalizeAnswer(opt) === normalizedUser) || normalizedUser === normalizedCorrect;
+
+            const input = document.getElementById('answer-input');
+            const feedback = document.getElementById('feedback');
+
+            if (isCorrect) {
+                correctCount++;
+                input.classList.add('correct');
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = '✓ Richtig! 🎉';
+                playCorrectSound();
+                launchFireworks();
+            } else {
+                wrongCount++;
+                input.classList.add('wrong');
+                feedback.className = 'feedback wrong';
+                feedback.innerHTML = `✗ Falsch. Richtige Antwort: <span class="correct-answer">${correctAnswer}</span>`;
+                wrongAnswers.push({
+                    question: isEnToDe ? q.en : q.de,
+                    correct: correctAnswer,
+                    given: userAnswer || '(keine Antwort)'
+                });
+            }
+
+            input.disabled = true;
+            document.getElementById('check-btn').classList.add('hidden');
+            document.getElementById('next-btn').classList.remove('hidden');
+            document.getElementById('next-btn').focus();
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('results-screen').style.display = 'block';
+
+            const percentage = Math.round((correctCount / questions.length) * 100);
+            document.getElementById('final-score').textContent = percentage + '%';
+            document.getElementById('correct-final').textContent = correctCount;
+            document.getElementById('total-final').textContent = questions.length;
+
+            let emoji = '🎉';
+            if (percentage < 50) emoji = '😅';
+            else if (percentage < 70) emoji = '🙂';
+            else if (percentage < 90) emoji = '😊';
+            document.getElementById('result-emoji').textContent = emoji;
+
+            const wrongList = document.getElementById('wrong-list');
+            const wrongItems = document.getElementById('wrong-items');
+            if (wrongAnswers.length > 0) {
+                wrongList.classList.remove('hidden');
+                wrongItems.innerHTML = wrongAnswers.map(w => `
+                    <div class="wrong-item">
+                        <strong>${w.question}</strong> → ${w.correct}
+                        <small>(du: ${w.given})</small>
+                    </div>
+                `).join('');
+            } else {
+                wrongList.classList.add('hidden');
+            }
+
+            if (percentage === 100) {
+                for (let i = 0; i < 10; i++) {
+                    setTimeout(() => launchFireworks(), i * 300);
+                }
+            }
+        }
+
+        function restartQuiz() {
+            document.getElementById('results-screen').style.display = 'none';
+            startQuiz();
+        }
+
+        // Enter key to check/next
+        document.getElementById('answer-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (!answered) {
+                    checkAnswer();
+                } else {
+                    nextQuestion();
+                }
+            }
+        });
+
+        // Load vocabulary on page load
+        loadVocabulary();
+    </script>
+</body>
+</html>
