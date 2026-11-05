@@ -1,17 +1,25 @@
-# fly.toml - Fly.io configuration
+# fly.toml app configuration file generated for vocabulary-quiz-python-pg86ua on 2026-11-05T17:02:18Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
-app = "vocabulary-quiz-python"
-primary_region = "fra"
+app = 'vocabulary-quiz-python-pg86ua'
+primary_region = 'fra'
 
 [build]
+[[mounts]]
+  source = 'vocab_data'
+  destination = '/data'
 
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = true
+  auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
 
-[mounts]
-  source = "vocab_data"
-  destination = "/data"
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+  memory_mb = 256
